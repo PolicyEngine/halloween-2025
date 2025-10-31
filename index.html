@@ -134,6 +134,41 @@
         .logo-container svg {
             width: 700px;
             height: auto;
+            max-width: 90vw;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .container {
+                width: 100vw;
+                height: 100vh;
+            }
+
+            .logo-container svg {
+                width: 90vw;
+            }
+
+            .pumpkin {
+                font-size: 60px;
+            }
+
+            .pumpkin.left { bottom: 40px; left: 20px; }
+            .pumpkin.right { bottom: 40px; right: 20px; }
+
+            .bat {
+                width: 30px;
+                height: 20px;
+            }
+
+            .ghost {
+                width: 50px;
+                height: 60px;
+            }
+
+            .tree {
+                width: 80px;
+                height: 200px;
+            }
         }
 
         /* Jack-o-lanterns */

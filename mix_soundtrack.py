@@ -3,6 +3,7 @@
 
 import numpy as np
 from scipy.io import wavfile
+from scipy import signal
 from pathlib import Path
 import subprocess
 
@@ -27,12 +28,24 @@ melody = melody.astype(np.float32) / 32767
 atmosphere = atmosphere.astype(np.float32) / 32767
 effects = effects.astype(np.float32) / 32767
 
-# Mix with careful levels (4 layers now!)
+# Apply gentler EQ - only filter extreme lows from other layers
+# Keep 60-250Hz bass content, just remove sub-bass competition
+b_hp, a_hp = signal.butter(4, 60/(sr1/2), btype='high')  # Gentler cutoff at 60Hz
+melody_filtered = signal.filtfilt(b_hp, a_hp, melody)
+atmosphere_filtered = signal.filtfilt(b_hp, a_hp, atmosphere)
+effects_filtered = signal.filtfilt(b_hp, a_hp, effects)
+
+# Low-shelf boost on bass layer for sub-bass dominance
+b_ls, a_ls = signal.butter(4, 100/(sr1/2), btype='low')
+bass_low_shelf = signal.filtfilt(b_ls, a_ls, bass)
+
+# Mix with strong bass but let other layers contribute to bass range
 mixed = (
-    0.40 * bass +           # Strong bass presence
-    0.30 * melody +         # Melodic elements
-    0.35 * atmosphere +     # Atmospheric layer
-    0.45 * effects          # Sound effects (most prominent)
+    0.65 * bass +              # Full bass layer
+    0.70 * bass_low_shelf +    # Sub-bass boost
+    0.25 * melody_filtered +   # Filtered melody (keeps 60Hz+)
+    0.28 * atmosphere_filtered + # Filtered atmosphere (keeps 60Hz+)
+    0.35 * effects_filtered    # Filtered effects (keeps 60Hz+)
 )
 
 # Master compression/limiting to prevent clipping

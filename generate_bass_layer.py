@@ -8,13 +8,24 @@ def generate_bass_layer(duration=12, sample_rate=44100):
     t = np.linspace(0, duration, int(sample_rate * duration))
     audio = np.zeros_like(t)
 
-    # Sub-bass drone (40-55Hz range - you feel this)
-    bass1 = 0.25 * np.sin(2 * np.pi * 42 * t)
-    bass2 = 0.20 * np.sin(2 * np.pi * 54 * t)
-    bass3 = 0.15 * np.sin(2 * np.pi * 48 * t)
+    # Sub-bass drone (30-55Hz range - you FEEL this)
+    # Much more sub-bass content for visceral impact
+    bass1 = 0.35 * np.sin(2 * np.pi * 35 * t)  # Even lower
+    bass2 = 0.32 * np.sin(2 * np.pi * 42 * t)
+    bass3 = 0.28 * np.sin(2 * np.pi * 48 * t)
+    bass4 = 0.25 * np.sin(2 * np.pi * 54 * t)
     # Slow modulation for "breathing"
-    mod = 0.7 + 0.3 * np.sin(2 * np.pi * 0.12 * t)
-    audio += (bass1 + bass2 + bass3) * mod
+    mod = 0.75 + 0.25 * np.sin(2 * np.pi * 0.12 * t)
+    audio += (bass1 + bass2 + bass3 + bass4) * mod
+
+    # Additional deep rumbling layer (25-40 Hz)
+    deep_rumble = (
+        0.25 * np.sin(2 * np.pi * 28 * t) +
+        0.20 * np.sin(2 * np.pi * 32 * t)
+    )
+    # Slow swell
+    rumble_mod = 0.6 + 0.4 * np.sin(2 * np.pi * 0.08 * t)
+    audio += deep_rumble * rumble_mod
 
     # Thunder rumbles (3 throughout)
     for rumble_time in [2.5, 7.0, 10.5]:
