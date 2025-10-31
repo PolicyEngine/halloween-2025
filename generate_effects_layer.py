@@ -26,7 +26,8 @@ def generate_effects_layer(duration=12, sample_rate=44100):
     audio += wind
 
     # === CREAKING WOOD ===
-    creak_times = [1.8, 4.5, 7.2, 10.0]
+    # Add more creaks in middle section
+    creak_times = [1.8, 4.2, 5.5, 6.8, 8.0, 9.5, 10.8]
     for creak_time in creak_times:
         start = int(creak_time * sample_rate)
         dur = int(0.9 * sample_rate)
@@ -42,7 +43,8 @@ def generate_effects_layer(duration=12, sample_rate=44100):
             audio[start:start + dur] += (creak_sound + creak_noise) * creak_env
 
     # === BAT SWOOSHES ===
-    bat_times = [2.0, 3.5, 6.0, 8.5, 11.0]
+    # Add more in middle section for better pacing
+    bat_times = [2.0, 3.5, 5.2, 6.5, 7.8, 8.5, 10.2, 11.0]
     for bat_time in bat_times:
         start = int(bat_time * sample_rate)
         dur = int(0.25 * sample_rate)
@@ -72,7 +74,8 @@ def generate_effects_layer(duration=12, sample_rate=44100):
             audio[start:start + dur] += step_sound * step_env * step_vol
 
     # === CHAINS RATTLING ===
-    chain_times = [5.5, 10.2]
+    # Add one in middle section
+    chain_times = [4.8, 7.2, 10.2]
     for chain_time in chain_times:
         start = int(chain_time * sample_rate)
         dur = int(0.7 * sample_rate)
@@ -103,6 +106,22 @@ def generate_effects_layer(duration=12, sample_rate=44100):
         howl_sound = 0.14 * np.sin(2 * np.pi * howl_freq * howl_t)
         howl_env = np.sin(np.pi * howl_t / 1.2) * np.exp(-howl_t * 0.5)
         audio[start:start + dur] += howl_sound * howl_env
+
+    # === BIG IMPACT/CRASH at 6 seconds (middle section) ===
+    # This WILL register as an event - loud transient
+    crash_time = 6.0
+    start = int(crash_time * sample_rate)
+    dur = int(0.5 * sample_rate)
+    if start + dur < len(audio):
+        crash_t = np.linspace(0, 0.5, dur)
+        # Metallic crash with noise burst
+        crash_sound = 0.6 * np.random.randn(len(crash_t))  # White noise burst
+        # Add metallic ringing
+        for freq in [1200, 2400, 3600, 4800]:
+            crash_sound += 0.3 * np.sin(2 * np.pi * freq * crash_t) * np.exp(-crash_t * 8)
+        # Sharp attack, fast decay
+        crash_env = np.exp(-crash_t * 6)
+        audio[start:start + dur] += crash_sound * crash_env * 0.7
 
     return audio
 

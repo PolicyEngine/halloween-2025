@@ -1,21 +1,21 @@
 {
-  "overall": "FAIL",
-  "score": "3/5",
+  "overall": "PASS",
+  "score": "5/5",
   "tests": [
     {
       "test": "frequency_coverage",
-      "passed": false,
+      "passed": true,
       "details": {
-        "sub_bass": 11.897249236896778,
-        "bass": 9.016848504501972,
-        "low_mid": 9.61953762041424,
-        "mid": 22.420110083297264,
-        "high_mid": 24.03521517906192,
-        "high": 23.011039375827817
+        "sub_bass": 18.186760008229143,
+        "bass": 30.664524607381544,
+        "low_mid": 6.255694888548187,
+        "mid": 11.813634802184392,
+        "high_mid": 14.4762136424234,
+        "high": 18.60317205123333
       },
       "checks": {
-        "has_sub_bass": false,
-        "has_bass": false,
+        "has_sub_bass": true,
+        "has_bass": true,
         "has_mids": true,
         "has_highs": true,
         "not_too_mid_heavy": true
@@ -23,10 +23,10 @@
     },
     {
       "test": "dynamic_range",
-      "passed": false,
+      "passed": true,
       "details": {
-        "crest_factor_db": 15.560230255126953,
-        "rms_level": 0.14670899510383606,
+        "crest_factor_db": 12.713798522949219,
+        "rms_level": 0.20360024273395538,
         "peak_level": 0.8799707293510437
       },
       "checks": {

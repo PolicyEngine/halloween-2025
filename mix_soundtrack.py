@@ -28,28 +28,33 @@ melody = melody.astype(np.float32) / 32767
 atmosphere = atmosphere.astype(np.float32) / 32767
 effects = effects.astype(np.float32) / 32767
 
-# Apply gentler EQ - only filter extreme lows from other layers
-# Keep 60-250Hz bass content, just remove sub-bass competition
-b_hp, a_hp = signal.butter(4, 60/(sr1/2), btype='high')  # Gentler cutoff at 60Hz
+# Apply high-pass filter to non-bass layers (remove everything <300Hz)
+b_hp, a_hp = signal.butter(6, 300/(sr1/2), btype='high')
 melody_filtered = signal.filtfilt(b_hp, a_hp, melody)
 atmosphere_filtered = signal.filtfilt(b_hp, a_hp, atmosphere)
 effects_filtered = signal.filtfilt(b_hp, a_hp, effects)
 
-# Low-shelf boost on bass layer for sub-bass dominance
-b_ls, a_ls = signal.butter(4, 100/(sr1/2), btype='low')
-bass_low_shelf = signal.filtfilt(b_ls, a_ls, bass)
+# Bass layer provides ALL low-end (20-250Hz)
 
-# Mix with strong bass but let other layers contribute to bass range
+# Mix with extreme bass dominance
 mixed = (
-    0.65 * bass +              # Full bass layer
-    0.70 * bass_low_shelf +    # Sub-bass boost
-    0.25 * melody_filtered +   # Filtered melody (keeps 60Hz+)
-    0.28 * atmosphere_filtered + # Filtered atmosphere (keeps 60Hz+)
-    0.35 * effects_filtered    # Filtered effects (keeps 60Hz+)
+    1.00 * bass +              # FULL VOLUME bass
+    0.06 * melody_filtered +   # Almost silent
+    0.07 * atmosphere_filtered + # Almost silent
+    0.08 * effects_filtered    # Almost silent
 )
 
-# Master compression/limiting to prevent clipping
-mixed = mixed / np.max(np.abs(mixed)) * 0.88
+# Apply soft compression to tame dynamic range
+threshold = 0.3
+ratio = 3.0
+compressed = np.copy(mixed)
+over_threshold = np.abs(compressed) > threshold
+compressed[over_threshold] = np.sign(compressed[over_threshold]) * (
+    threshold + (np.abs(compressed[over_threshold]) - threshold) / ratio
+)
+
+# Master limiting
+mixed = compressed / np.max(np.abs(compressed)) * 0.88
 
 # Apply master fade for looping
 fade_samples = int(2.0 * sr1)
