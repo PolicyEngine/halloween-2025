@@ -401,7 +401,7 @@
     </div>
 
     <!-- Spooky Soundtrack -->
-    <audio autoplay loop>
+    <audio id="bgAudio" preload="auto" loop>
         <source src="spooky-soundtrack.mp3" type="audio/mpeg">
     </audio>
 
@@ -417,37 +417,56 @@
         border-radius: 30px;
         font-family: Arial, sans-serif;
         font-size: 18px;
+        font-weight: bold;
         cursor: pointer;
         z-index: 1000;
         box-shadow: 0 0 20px rgba(255, 107, 53, 0.6);
-        display: none;
+        animation: pulse 2s infinite;
     ">
-        🔊 Click anywhere for spooky sound
+        🔊 Click for spooky sound
     </div>
 
-    <!-- Enable audio on click if autoplay is blocked -->
+    <style>
+        @keyframes pulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.05); }
+        }
+    </style>
+
+    <!-- Enable audio immediately on ANY user interaction -->
     <script>
-        const audio = document.querySelector('audio');
+        const audio = document.getElementById('bgAudio');
         const prompt = document.getElementById('audioPrompt');
+        let audioStarted = false;
 
-        // Try to autoplay
-        audio.play().catch(() => {
-            // If blocked, show prompt
-            prompt.style.display = 'block';
+        // Show prompt immediately (assume autoplay will be blocked)
+        prompt.style.display = 'block';
 
-            // Play on any click
-            function playAudio() {
+        // Play on any interaction
+        function startAudio() {
+            if (!audioStarted) {
                 audio.play().then(() => {
+                    audioStarted = true;
                     prompt.style.display = 'none';
+                }).catch(err => {
+                    console.log('Audio play failed:', err);
                 });
-                document.removeEventListener('click', playAudio);
             }
-            document.addEventListener('click', playAudio);
+        }
+
+        // Listen for multiple event types
+        ['click', 'touchstart', 'keydown'].forEach(eventType => {
+            document.addEventListener(eventType, startAudio, { once: true });
         });
 
-        // Hide prompt if audio plays successfully
-        audio.addEventListener('play', () => {
-            prompt.style.display = 'none';
+        // Try autoplay on load (usually fails but worth trying)
+        window.addEventListener('load', () => {
+            audio.play().then(() => {
+                audioStarted = true;
+                prompt.style.display = 'none';
+            }).catch(() => {
+                // Keep prompt visible
+            });
         });
     </script>
 </body>
