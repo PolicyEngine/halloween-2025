@@ -364,5 +364,22 @@
             </svg>
         </div>
     </div>
+
+    <!-- Spooky Soundtrack -->
+    <audio autoplay loop>
+        <source src="spooky-soundtrack.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Enable audio on click if autoplay is blocked -->
+    <script>
+        const audio = document.querySelector('audio');
+        // Try to play, but browsers often block autoplay
+        audio.play().catch(() => {
+            // If blocked, play on first user interaction
+            document.addEventListener('click', () => {
+                audio.play();
+            }, { once: true });
+        });
+    </script>
 </body>
 </html>
