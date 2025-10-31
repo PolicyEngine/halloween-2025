@@ -405,15 +405,49 @@
         <source src="spooky-soundtrack.mp3" type="audio/mpeg">
     </audio>
 
+    <!-- Audio control indicator -->
+    <div id="audioPrompt" style="
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255, 107, 53, 0.9);
+        color: white;
+        padding: 15px 30px;
+        border-radius: 30px;
+        font-family: Arial, sans-serif;
+        font-size: 18px;
+        cursor: pointer;
+        z-index: 1000;
+        box-shadow: 0 0 20px rgba(255, 107, 53, 0.6);
+        display: none;
+    ">
+        🔊 Click anywhere for spooky sound
+    </div>
+
     <!-- Enable audio on click if autoplay is blocked -->
     <script>
         const audio = document.querySelector('audio');
-        // Try to play, but browsers often block autoplay
+        const prompt = document.getElementById('audioPrompt');
+
+        // Try to autoplay
         audio.play().catch(() => {
-            // If blocked, play on first user interaction
-            document.addEventListener('click', () => {
-                audio.play();
-            }, { once: true });
+            // If blocked, show prompt
+            prompt.style.display = 'block';
+
+            // Play on any click
+            function playAudio() {
+                audio.play().then(() => {
+                    prompt.style.display = 'none';
+                });
+                document.removeEventListener('click', playAudio);
+            }
+            document.addEventListener('click', playAudio);
+        });
+
+        // Hide prompt if audio plays successfully
+        audio.addEventListener('play', () => {
+            prompt.style.display = 'none';
         });
     </script>
 </body>
