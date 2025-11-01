@@ -480,32 +480,40 @@
         const soundWaves = document.getElementById('soundWaves');
         let isMobile = window.matchMedia('(max-width: 768px)').matches;
 
+        // Setup toggle button for both mobile and desktop (if autoplay fails)
+        toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (audio.paused) {
+                audio.play().then(() => {
+                    soundWaves.classList.add('playing');
+                    toggle.style.display = 'none'; // Hide once playing
+                });
+            } else {
+                audio.pause();
+                soundWaves.classList.remove('playing');
+            }
+        });
+
         // Desktop: try autoplay immediately
         if (!isMobile) {
-            audio.play().catch(() => {
-                console.log('Desktop autoplay blocked - unusual');
+            audio.play().then(() => {
+                // Success - keep button hidden
+            }).catch(() => {
+                // Autoplay blocked even on desktop - show button
+                toggle.style.display = 'block';
             });
         } else {
-            // Mobile: toggle button controls
-            toggle.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (audio.paused) {
-                    audio.play().then(() => {
-                        soundWaves.classList.add('playing');
-                    });
-                } else {
-                    audio.pause();
-                    soundWaves.classList.remove('playing');
-                }
-            });
+            // Mobile: show button always (autoplay always blocked)
+            toggle.style.display = 'block';
 
-            // Also play on first page interaction
+            // Also try to play on first page interaction
             let firstInteraction = true;
             document.addEventListener('touchstart', () => {
                 if (firstInteraction && audio.paused) {
                     firstInteraction = false;
                     audio.play().then(() => {
                         soundWaves.classList.add('playing');
+                        toggle.style.display = 'none';
                     }).catch(() => {});
                 }
             }, { once: true });
