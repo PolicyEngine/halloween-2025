@@ -425,88 +425,96 @@
         <source src="spooky-soundtrack.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- Audio control indicator -->
-    <div id="audioPrompt" style="
+    <!-- Subtle audio control - only visible on mobile -->
+    <button id="audioToggle" style="
+        display: none;
         position: fixed;
-        bottom: 40px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(255, 107, 53, 0.95);
-        color: white;
-        padding: 20px 40px;
-        border-radius: 50px;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-        font-size: 22px;
-        font-weight: bold;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.6);
+        border: 2px solid rgba(255, 107, 53, 0.8);
         cursor: pointer;
         z-index: 10000;
-        box-shadow: 0 0 40px rgba(255, 107, 53, 0.9), 0 0 80px rgba(139, 71, 137, 0.6);
-        animation: bigPulse 1.2s infinite;
-        text-align: center;
-        user-select: none;
-        -webkit-user-select: none;
-        -webkit-tap-highlight-color: transparent;
-    ">
-        🔊 TAP FOR SOUND 🔊
-    </div>
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    " aria-label="Toggle sound">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" style="margin: 11px;">
+            <path id="soundIcon" d="M11 5L6 9H2V15H6L11 19V5Z M15.54 8.46C16.4774 9.39764 17.0039 10.6692 17.0039 11.995C17.0039 13.3208 16.4774 14.5924 15.54 15.53" stroke="#FF6B35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path id="soundWaves" d="M19 6C20.6569 7.65685 21.5 9.87891 21.5 12.2C21.5 14.5211 20.6569 16.7431 19 18.4" stroke="#FF6B35" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+    </button>
 
     <style>
-        @keyframes bigPulse {
-            0%, 100% {
-                transform: translateX(-50%) scale(1);
-                box-shadow: 0 0 40px rgba(255, 107, 53, 0.9), 0 0 80px rgba(139, 71, 137, 0.6);
-            }
-            50% {
-                transform: translateX(-50%) scale(1.08);
-                box-shadow: 0 0 60px rgba(255, 107, 53, 1), 0 0 100px rgba(139, 71, 137, 0.8);
+        #audioToggle:hover {
+            background: rgba(255, 107, 53, 0.3);
+            transform: scale(1.1);
+        }
+
+        /* Only show on mobile */
+        @media (max-width: 768px) {
+            #audioToggle {
+                display: block !important;
             }
         }
 
-        @media (max-width: 768px) {
-            #audioPrompt {
-                font-size: 26px !important;
-                padding: 25px 50px !important;
-                bottom: 60px !important;
-                width: 80vw !important;
-                max-width: 400px !important;
-            }
+        .playing {
+            animation: soundPulse 2s infinite;
+        }
+
+        @keyframes soundPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
     </style>
 
-    <!-- Enable audio immediately on ANY user interaction -->
+    <!-- Audio control logic -->
     <script>
         const audio = document.getElementById('bgAudio');
-        const prompt = document.getElementById('audioPrompt');
-        let audioStarted = false;
+        const toggle = document.getElementById('audioToggle');
+        const soundWaves = document.getElementById('soundWaves');
+        let isMobile = window.matchMedia('(max-width: 768px)').matches;
 
-        // Show prompt immediately (assume autoplay will be blocked)
-        prompt.style.display = 'block';
+        // Desktop: try autoplay immediately
+        if (!isMobile) {
+            audio.play().catch(() => {
+                console.log('Desktop autoplay blocked - unusual');
+            });
+        } else {
+            // Mobile: toggle button controls
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (audio.paused) {
+                    audio.play().then(() => {
+                        soundWaves.classList.add('playing');
+                    });
+                } else {
+                    audio.pause();
+                    soundWaves.classList.remove('playing');
+                }
+            });
 
-        // Play on any interaction
-        function startAudio() {
-            if (!audioStarted) {
-                audio.play().then(() => {
-                    audioStarted = true;
-                    prompt.style.display = 'none';
-                }).catch(err => {
-                    console.log('Audio play failed:', err);
-                });
-            }
+            // Also play on first page interaction
+            let firstInteraction = true;
+            document.addEventListener('touchstart', () => {
+                if (firstInteraction && audio.paused) {
+                    firstInteraction = false;
+                    audio.play().then(() => {
+                        soundWaves.classList.add('playing');
+                    }).catch(() => {});
+                }
+            }, { once: true });
         }
 
-        // Listen for multiple event types
-        ['click', 'touchstart', 'keydown'].forEach(eventType => {
-            document.addEventListener(eventType, startAudio, { once: true });
+        // Visual feedback when playing
+        audio.addEventListener('play', () => {
+            soundWaves?.classList.add('playing');
         });
-
-        // Try autoplay on load (usually fails but worth trying)
-        window.addEventListener('load', () => {
-            audio.play().then(() => {
-                audioStarted = true;
-                prompt.style.display = 'none';
-            }).catch(() => {
-                // Keep prompt visible
-            });
+        audio.addEventListener('pause', () => {
+            soundWaves?.classList.remove('playing');
         });
     </script>
 </body>
