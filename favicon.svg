@@ -1,0 +1,19 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Pumpkin body -->
+  <circle cx="16" cy="17" r="13" fill="#FF6B35"/>
+
+  <!-- Stem -->
+  <rect x="14" y="5" width="4" height="4" fill="#2D5016" rx="1"/>
+
+  <!-- Left eye -->
+  <path d="M10 14 L13 14 L11.5 11 Z" fill="#000000"/>
+
+  <!-- Right eye -->
+  <path d="M19 14 L22 14 L20.5 11 Z" fill="#000000"/>
+
+  <!-- Nose -->
+  <path d="M15 17 L17 17 L16 19 Z" fill="#000000"/>
+
+  <!-- Mouth (jagged grin) -->
+  <path d="M10 21 L11 23 L12.5 21 L14 23 L15.5 21 L17 23 L18.5 21 L20 23 L22 21 L16 22 Z" fill="#000000"/>
+</svg>
